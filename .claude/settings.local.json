@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(hass-cli config:*)",
+      "Bash(hass-cli service:*)",
+      "Bash(hass-cli entity:*)",
+      "Bash(hass-cli system:*)",
+      "Bash(hass-cli template:*)",
+      "Bash(hass-cli state:*)",
+      "Bash(hass-cli:*)",
+      "Bash(ssh ha \"ls -la /config/\")",
+      "Bash(ssh ha \"ls -la /config/*.yaml\")",
+      "Bash(ssh ha \"cat /config/automations.yaml\")",
+      "WebFetch(domain:www.home-assistant.io)",
+      "WebFetch(domain:github.com)",
+      "WebSearch",
+      "WebFetch(domain:community.home-assistant.io)",
+      "Bash(ssh ha \"grep -n \"\"id: ''1730337600001_debug\\|id: ''test_forecast_debug\\|id: ''simple_weather_debug''\"\" /config/automations.yaml\")",
+      "Bash(ssh ha \"sed -i.bak -e ''739,/^- id:/d; 756,/^- id:/d'' /config/automations.yaml 2>&1 || echo ''sed failed, trying different approach''\")",
+      "Bash(ssh ha \"awk ''/^- id: .test_forecast_debug.|^- id: .1730337600001_debug./{flag=1} flag && /^- id:/ && !/^- id: .test_forecast_debug.|^- id: .1730337600001_debug./{flag=0} !flag'' /config/automations.yaml > /tmp/automations_cleaned.yaml && mv /tmp/automations_cleaned.yaml /config/automations.yaml && echo ''Debug automations removed''\")",
+      "Bash(ssh ha \"head -738 /config/automations.yaml > /config/automations.yaml.new && cat /config/automations.yaml.new > /config/automations.yaml && rm /config/automations.yaml.new && echo ''Removed debug automations (kept first 738 lines)''\")",
+      "Bash(ssh ha \"sed -n ''693,738p'' /config/automations.yaml\")",
+      "Bash(ssh ha \"ls -la ~/.ssh/\")",
+      "Read(//Users/gcamp/.ssh/**)",
+      "Bash(ssh-keygen:*)",
+      "Bash(cat:*)",
+      "Bash(ssh-add:*)",
+      "Bash(ssh ha \"ssh-add -l 2>&1\")",
+      "Bash(ssh ha \"ssh -T git@github.com 2>&1\")",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(tee:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
