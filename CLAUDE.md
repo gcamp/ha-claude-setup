@@ -1,5 +1,27 @@
 # Home Assistant Configuration
 
+---
+## ⚠️ CRITICAL: GIT COMMIT WORKFLOW ⚠️
+
+**MANDATORY: ALWAYS COMMIT AFTER ANY CONFIGURATION CHANGES!**
+
+When Claude makes ANY changes to configuration files:
+1. ✅ **ALWAYS commit immediately after changes**:
+   ```bash
+   ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of changes made>' && git push"
+   ```
+
+**NO EXCEPTIONS. COMMIT EVERY TIME.**
+
+For optional pre-change commits (recommended for complex changes):
+```bash
+ssh ha-local "cd /config && git add -A && git commit -m 'Pre-Claude: <description of planned changes>' && git push"
+```
+
+See [Git Version Control](#git-version-control) section for full details.
+
+---
+
 ## Working with the Configuration
 
 - Use `hass-cli` to connect to and interact with the Home Assistant instance
@@ -89,16 +111,23 @@ The `/config/` directory is a git repository backed up to GitHub at `git@github.
 
 ### Making Changes with Claude
 
-**CRITICAL: Always create a commit before AND after any changes!**
+**CRITICAL: MANDATORY POST-CHANGE COMMITS!**
 
-Before Claude makes any configuration changes:
-1. Create a pre-change commit: `ssh ha-local "cd /config && git add -A && git commit -m 'Pre-Claude: <description of planned changes>'"`
-2. Push to GitHub for backup: `ssh ha-local "cd /config && git push"`
+✅ **AFTER every configuration change (MANDATORY):**
+```bash
+ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of changes made>' && git push"
+```
 
-After Claude makes changes:
+**This is REQUIRED. Claude must NEVER skip this step.**
+
+Optional pre-change commit (recommended for complex/experimental changes):
+```bash
+ssh ha-local "cd /config && git add -A && git commit -m 'Pre-Claude: <description of planned changes>' && git push"
+```
+
+To review or revert changes:
 1. Review changes: `ssh ha-local "cd /config && git diff"`
-2. Commit if satisfied: `ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of changes made>' && git push"`
-3. Revert if needed: `ssh ha-local "cd /config && git reset --hard HEAD~1 && git push --force"`
+2. Revert if needed: `ssh ha-local "cd /config && git reset --hard HEAD~1 && git push --force"`
 
 ### Useful Git Commands
 
@@ -133,7 +162,7 @@ The dashboard is configured in **YAML mode** using the sections layout.
 1. Edit `/config/ui-lovelace.yaml` directly via SSH
 2. Reload configuration: `hass-cli service call homeassistant.reload_core_config`
 3. Refresh browser to see changes
-4. Commit changes to git
+4. **⚠️ COMMIT CHANGES:** `ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description>' && git push"`
 
 **Getting YAML from UI:**
 - If you need to export current UI config to YAML, use the Raw Configuration Editor in the UI
@@ -271,6 +300,11 @@ hass-cli service call automation.reload
 
 # Verify specific automation
 hass-cli state get automation.<entity_id>
+```
+
+**Step 4: ⚠️ COMMIT CHANGES**
+```bash
+ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of automation changes>' && git push"
 ```
 
 ### Helper Scripts
