@@ -2,6 +2,7 @@
 *.tmp
 *.bak
 *.backup*
+workspace/
 
 # OS files
 .DS_Store
