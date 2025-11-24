@@ -1,111 +1,123 @@
-# Home Assistant Configuration
+# CLAUDE.md
 
-## Working with the Configuration
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-- Use `hass-cli` to connect to and interact with the Home Assistant instance
-- For direct file editing, use SSH with the saved config: `ssh ha`
-- Configuration files are located in `/config/` on the Home Assistant host
-- Key configuration files:
-  - `/config/automations.yaml` - Automation definitions
-  - `/config/configuration.yaml` - Main configuration
-  - `/config/scenes.yaml` - Scene definitions
-  - `/config/scripts.yaml` - Script definitions
-  - `/config/sensors.yaml` - Sensor configurations
-- Changes to configuration files typically require restarting Home Assistant or reloading the specific integration
+## Overview
 
-## hass-cli Usage
+This is a Home Assistant configuration repository running on Home Assistant OS. The configuration includes custom integrations, ESPHome devices, Zigbee2MQTT, and a highly customized Lovelace dashboard.
 
-The `hass-cli` tool can be used to interact with the Home Assistant instance.
+## Configuration Structure
 
-### Available Commands
-- `area` - Get info and operate on areas
-- `config` - Get configuration from Home Assistant instance
-- `device` - Get info and operate on devices
-- `discover` - Discovery for the local network
-- `entity` - Get info on entities
-- `event` - Interact with events
-- `info` - Get basic info from Home Assistant
-- `map` - Show the location of the config or an entity on a map
-- `raw` - Call the raw API (advanced)
-- `service` - Call and work with services
-- `state` - Get info on entity state
-- `system` - System details and operations
-- `template` - Render templates on server or locally
+### Main Configuration Files
 
-### Common Options
-- `-s, --server TEXT` - The server URL (or set `HASS_SERVER` env var)
-- `--token TEXT` - Bearer token for authentication (or set `HASS_TOKEN` env var)
-- `-o, --output [json|yaml|table|auto]` - Output format
-- `-v, --verbose` - Enables verbose mode
+- `configuration.yaml` - Main Home Assistant configuration with:
+  - Package includes from `packages/` directory (currently empty but structure exists)
+  - InfluxDB integration for metrics (host: 10.0.0.10)
+  - MQTT sensors for Tesla data via TeslaMate
+  - Lovelace YAML mode configuration
+  - Custom panel definitions for Add-ons, Automations, and Integrations
 
-Use `hass-cli COMMAND --help` for detailed help on each command.
+- `automations.yaml` - All automation definitions
+- `scripts.yaml` - Reusable scripts (backup creation, door locking, pool control)
+- `scenes.yaml` - Scene definitions (lighting scenes)
+- `sensors.yaml` - Template sensors including:
+  - ERV (Energy Recovery Ventilator) monitoring
+  - Indoor air quality scoring system (temperature, humidity, CO2)
+  - Thermal comfort calculations
 
-### Key Command Details
+- `ui-lovelace.yaml` - Dashboard configuration using:
+  - Decluttering templates (especially for Hilo Défi cards)
+  - Custom HACS cards: Bubble Card, Mushroom, card-mod, mini-graph-card, Valetudo Map Card, etc.
 
-#### Config Commands
-- `hass-cli config full` - Get full configuration details
-- `hass-cli config components` - List loaded components
-- `hass-cli config release` - Get Home Assistant release version
+- `modbus.yml` - Modbus RTU configuration for EG4 3000EHV inverter (currently commented out in configuration.yaml)
+  - Serial connection: `/dev/serial/by-id/usb-FTDI_FT231X_USB_UART_D30JX932-if00-port0`
+  - Baudrate: 9600, RTU mode
 
-#### Service Commands
-- `hass-cli service list` - List all available services
-- `hass-cli service call <domain.service>` - Call a service (e.g., `homeassistant.reload_config_entry`)
+### Key Integrations
 
-#### Entity Commands
-- `hass-cli entity list` - List all entities
-- `hass-cli entity rename <old_id> <new_id>` - Rename an entity
-- `hass-cli entity assign <entity_id> --area <area>` - Assign entity to area
+**Custom Components** (in `custom_components/`):
+- `hilo` - Hilo energy management integration (Hydro-Québec)
+- `frigate` - NVR/camera integration
+- `tesla_custom` - Tesla vehicle integration
+- `ecoflow_cloud` - EcoFlow battery/solar products
+- `daikinone` - Daikin HVAC control
+- `zigbee2mqtt` - Zigbee device management (via MQTT bridge)
+- `scheduler` - Advanced scheduling
+- `thermal_comfort` - Thermal comfort calculations
+- `pikvm_ha` - Pi-KVM integration
+- `tplink_deco` - TP-Link Deco mesh router integration
+- `iphonedetect` - iPhone presence detection
+- `nodered` - Node-RED integration
+- `homekit_controller` - HomeKit device control
+- `hacs` - Home Assistant Community Store
 
-#### State Commands
-- `hass-cli state list` - List all entity states
-- `hass-cli state get <entity_id>` - Get specific entity state
-- `hass-cli state edit <entity_id>` - Edit entity state
-- `hass-cli state toggle <entity_id>` - Toggle entity state
-- `hass-cli state turn_on/turn_off <entity_id>` - Turn entity on/off
+**ESPHome Devices** (in `esphome/`):
+- `waveshare-relay.yaml` - ESP32-S3 based relay controller
+- Configuration uses secrets from `esphome/secrets.yaml` (gitignored)
 
-#### System Commands
-- `hass-cli system health` - Get system health status
-- `hass-cli system log` - Get system errors/logs
+**Zigbee2MQTT** (in `zigbee2mqtt/`):
+- Configuration in `configuration.yaml`
+- Network keys and PAN IDs configured
+- State files and coordinator backups are gitignored
 
-#### Template Commands
-- `hass-cli template <template_file> [data_file]` - Render Jinja2 templates
-- `hass-cli template --local <template_file>` - Render template locally
+**Go2RTC** (video streaming):
+- Configuration in `go2rtc.yaml`
+- Aqara G4 doorbell via HomeKit protocol with audio transcoding
 
-## SSH Access
+## Development Workflow
+
+### Validation and Reloading
+
+Since the `ha` CLI is not available in this environment, use the Home Assistant UI or restart the container:
+
+**For automation/script/template changes:**
+- Use Developer Tools → YAML → Reload Automations/Scripts/Template Entities
+- Or call service: `homeassistant.reload_all`
+
+**For dashboard changes (`ui-lovelace.yaml`):**
+- Just refresh the browser - Lovelace YAML mode auto-reloads
+
+**For `configuration.yaml` changes:**
+- Requires full Home Assistant restart
+- Use Developer Tools → YAML → Check Configuration first
+- Then Developer Tools → Server Controls → Restart
+
+### SSH Access
+
+**IMPORTANT: Always use `ssh ha-local` for all operations (fallback to `ssh ha` only if local unavailable)**
 
 SSH access is available via two saved configs:
-- `ssh ha-local` - Preferred when on local network (faster, more reliable)
+- `ssh ha-local` - **Preferred when on local network** (faster, more reliable)
 - `ssh ha` - Fallback when remote or local connection unavailable
 
 The SSH connection provides direct access to the Home Assistant host for file editing and system management.
 
 **Note**: Save temporary files to current directory (`/Users/gcamp/Dev/home-assistant`) instead of `/tmp` for better organization.
 
-## Git Version Control
+### Git Workflow
 
-The `/config/` directory is a git repository backed up to GitHub at `git@github.com:gcamp/home-assistant-config.git`.
+**CRITICAL: Always commit before making changes!**
 
-### Making Changes with Claude
+The `/config/` directory on the Home Assistant host is a git repository backed up to GitHub at `git@github.com:gcamp/home-assistant-config.git`.
 
-Before Claude makes any configuration changes:
-1. Create a pre-change commit: `ssh ha "cd /config && git add -A && git commit -m 'Pre-Claude: <description of planned changes>'"`
-2. Push to GitHub for backup: `ssh ha "cd /config && git push"`
+**Before making ANY configuration changes, ALWAYS:**
+1. Create pre-change commit: `ssh ha-local "cd /config && git add -A && git commit -m 'Pre-Claude: <description of planned changes>' && git push"`
 
-After Claude makes changes:
-1. Review changes: `ssh ha "cd /config && git diff"`
-2. Commit if satisfied: `ssh ha "cd /config && git add -A && git commit -m 'Claude: <description of changes made>' && git push"`
-3. Revert if needed: `ssh ha "cd /config && git reset --hard HEAD~1 && git push --force"`
+This is NON-NEGOTIABLE and must be done BEFORE any edits, even during planning phase.
 
-### Useful Git Commands
+**After Claude makes changes:**
+1. Review changes: `ssh ha-local "cd /config && git diff"`
+2. Commit if satisfied: `ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of changes made>' && git push"`
+3. Revert if needed: `ssh ha-local "cd /config && git reset --hard HEAD~1 && git push --force"`
 
-- **View recent changes**: `ssh ha "cd /config && git log --oneline -10"`
-- **See what changed**: `ssh ha "cd /config && git diff HEAD~1"`
-- **Revert to specific commit**: `ssh ha "cd /config && git reset --hard <commit-hash> && git push --force"`
-- **Create experimental branch**: `ssh ha "cd /config && git checkout -b experiment"`
-- **Return to main**: `ssh ha "cd /config && git checkout main"`
+**Useful Git Commands:**
+- View recent changes: `ssh ha-local "cd /config && git log --oneline -10"`
+- See what changed: `ssh ha-local "cd /config && git diff HEAD~1"`
+- Revert to specific commit: `ssh ha-local "cd /config && git reset --hard <commit-hash> && git push --force"`
+- Create experimental branch: `ssh ha-local "cd /config && git checkout -b experiment"`
+- Return to main: `ssh ha-local "cd /config && git checkout main"`
 
-### .gitignore
-
+**`.gitignore`:**
 The following files are excluded from version control:
 - `secrets.yaml` (sensitive credentials)
 - `.storage/` (internal HA state)
@@ -113,275 +125,48 @@ The following files are excluded from version control:
 - `*.log` (logs)
 - `*.bak`, `*.backup_*` (manual backups)
 
-## Dashboard Configuration
+## Important Notes
 
-The dashboard is configured in **YAML mode** using the sections layout.
+### Security Considerations
 
-### Dashboard Files
+- **Never commit secrets**: `secrets.yaml` files are gitignored
+- The `configuration.yaml` contains an InfluxDB token that should be moved to `secrets.yaml`
+- ESPHome API keys and OTA passwords should remain in the gitignored `esphome/secrets.yaml`
+- Zigbee2MQTT network keys are in plain YAML and should ideally be moved to secrets
 
-- `/config/ui-lovelace.yaml` - Main dashboard configuration (YAML format, version controlled)
-- `/config/.storage/lovelace` - Legacy UI mode config (JSON format, gitignored - kept as backup)
-- `/config/.storage/lovelace_resources` - Legacy resources (gitignored - no longer used)
+### Templating and French Localization
 
-### Editing the Dashboard
+- Hilo integration heavily uses French language templates
+- Défi Hilo cards use custom decluttering templates for challenge events
+- Template sensors use Home Assistant's Jinja2 templating
 
-**Via YAML (Current Method):**
-1. Edit `/config/ui-lovelace.yaml` directly via SSH
-2. Reload configuration: `hass-cli service call homeassistant.reload_core_config`
-3. Refresh browser to see changes
-4. Commit changes to git
+### HACS Resources
 
-**Getting YAML from UI:**
-- If you need to export current UI config to YAML, use the Raw Configuration Editor in the UI
-- Dashboard → Edit → Three dots → Raw configuration editor
-- Copy the YAML output
+All Lovelace resources are loaded from `/hacsfiles/` and defined in `configuration.yaml`:
+- When adding new cards, add the resource URL to `configuration.yaml` under `lovelace.resources`
+- Resources use `?hacstag=` for cache busting
 
-### YAML Mode Configuration
+### Modbus Integration
 
-The dashboard is in YAML mode with resources explicitly defined in `configuration.yaml`:
+The EG4 inverter Modbus configuration is currently commented out in `configuration.yaml` (line 102).
+To enable: uncomment `modbus: !include modbus.yml`
 
-```yaml
-lovelace:
-  mode: yaml
-  resources:
-    # All 13 HACS custom cards defined here
-    - url: /hacsfiles/lovelace-mushroom/mushroom.js
-      type: module
-    # ... etc
-```
+### Package Structure
 
-**Key Resources:**
-- lovelace-valetudo-map-card
-- lovelace-mushroom (heavily used)
-- mini-graph-card (heavily used)
-- lovelace-card-mod (for styling/animations)
-- decluttering-card (for Hilo defi templates)
-- stack-in-card
-- bar-card
-- config-template-card
-- And 5 more...
+The configuration uses `packages: !include_dir_merge_named packages/` but the directory doesn't currently exist. This allows splitting configuration into logical packages when needed.
 
-**Important**: Resources MUST be defined in `configuration.yaml` when using YAML mode. Previously attempted YAML mode failed because resources were not explicitly defined.
+## Common Entity Patterns
 
-### Converting from UI Mode to YAML Mode
+- **Hilo sensors**: `sensor.defi_hilo*`, `sensor.hilo_*`
+- **Tesla sensors**: `sensor.tesla_*` (MQTT from TeslaMate)
+- **Thermal comfort**: Uses `sensor.thermal_comfort_*` from thermal_comfort integration
+- **Indoor air quality**: Template sensors with scoring system (temperature_score, humidity_score, co2_score)
+- **ERV**: Energy Recovery Ventilator state determined by power consumption ranges
 
-If you need to convert again or help someone else:
+## Architecture Notes
 
-1. **Export from UI**: Get YAML from Raw Configuration Editor
-2. **Create ui-lovelace.yaml**: Save exported YAML to `/config/ui-lovelace.yaml`
-3. **Define resources**: Add `lovelace:` block to `configuration.yaml` with all resources from `.storage/lovelace_resources`
-4. **Reload config**: `hass-cli service call homeassistant.reload_core_config`
-5. **Test thoroughly**: Verify all views, custom cards, and decluttering templates work
-
-### Dashboard Layout
-
-The dashboard uses the **sections layout** (vs. masonry). Sections organize cards into titled groups for better organization. Compatible with YAML mode.
-
-## Configuration Best Practices
-
-- **Always validate before restarting**: `ssh ha-local "ha core check"` (or `ssh ha-local "ha core restart"` if valid)
-- Dashboard changes (ui-lovelace.yaml) take effect immediately on browser refresh
-- For automations/scripts, reload: `hass-cli service call automation.reload` or `homeassistant.reload_all`
-- Always commit working states to git before making experimental changes
-
-### Automation Best Practices
-
-- **Add section titles**: Always add `alias` field to `choose` action sections for better readability in the UI
-- **Use templates over conditions**: When toggling state and notifying, use templates in notification messages instead of multiple `choose` conditions
-- **Example**:
-  ```yaml
-  # Good: Template in message
-  - service: input_boolean.toggle
-    target:
-      entity_id: input_boolean.example
-  - service: notify.all_apps
-    data:
-      message: >
-        {% if is_state('input_boolean.example', 'on') %}
-        Enabled
-        {% else %}
-        Disabled
-        {% endif %}
-
-  # Avoid: Multiple choose sections for same action
-  - choose:
-    - conditions:
-      - condition: state
-        entity_id: input_boolean.example
-        state: 'on'
-      sequence:
-      - service: notify.all_apps
-        data:
-          message: Enabled
-    - conditions:
-      - condition: state
-        entity_id: input_boolean.example
-        state: 'off'
-      sequence:
-      - service: notify.all_apps
-        data:
-          message: Disabled
-  ```
-
-## Editing Automations with Claude
-
-### Overview
-
-Automations are stored in a single file (`/config/automations.yaml`) which can be large (1387 lines, 42 automations). To make Claude's editing more efficient, helper scripts are available to:
-1. Generate a summary of all automations (without reading the full file)
-2. Extract individual automations for focused editing
-3. Merge edited automations back
-
-### Workflow for Claude
-
-**Step 1: Generate and Read Summary**
-
-Always start by generating a summary to see all automations:
-```bash
-ssh ha-local "/config/automation-summary.sh"
-```
-
-This outputs a concise list of all automations with index, ID, and alias. **Much faster than reading the full 1387-line file.**
-
-**Step 2: Edit Automations**
-
-For most edits, directly edit the full file:
-```bash
-# Copy to current directory (prefer ha-local, fallback to ha)
-ssh ha-local 'cat /config/automations.yaml' | tee automations.yaml > /dev/null
-
-# Edit using the Edit tool
-# Find automation by ID or alias and make changes
-
-# Upload back
-scp automations.yaml ha-local:/config/automations.yaml
-```
-
-**Step 3: Reload and Verify**
-```bash
-# Validate
-ssh ha-local "ha core check"
-
-# Reload automations
-hass-cli service call automation.reload
-
-# Verify specific automation
-hass-cli state get automation.<entity_id>
-```
-
-### Helper Scripts
-
-**Automation Summary** (`/config/automation-summary.sh`)
-- Generates real-time summary of all automations (outputs to stdout)
-- Usage: `ssh ha-local "/config/automation-summary.sh"`
-
-**Automation Helper** (`/config/automation-helper.sh`)
-- Extract: `ssh ha-local "/config/automation-helper.sh extract '<id_or_alias>'"`
-- List: `ssh ha-local "/config/automation-helper.sh list"`
-- Merge: `ssh ha-local "/config/automation-helper.sh merge '<id_or_alias>'"`
-
-**Use extract/merge when:** Completely rewriting complex automation (100+ lines) or testing YAML syntax in isolation
-**Use direct edit when:** Small, surgical changes (90% of cases)
-
-**Notes:**
-- ✅ GUI editing still works! Single-file approach preserves UI editing
-- Always use `ssh ha-local` (prefer over `ssh ha` to avoid connection errors)
-- Extracted automations go to `/tmp/automation-extract/` (temporary)
-
-### File Transfer Best Practices
-
-When copying files from HA to local for editing:
-
-**ALWAYS use this pattern to avoid corrupting files:**
-```bash
-# Good: Direct file copy to current directory (prefer ha-local)
-ssh ha-local 'cat /config/automations.yaml' | tee automations.yaml > /dev/null
-
-# Bad: Redirecting stderr can mix error messages into file
-ssh ha 'cat /config/automations.yaml' > automations.yaml 2>&1
-```
-
-**Key points:**
-- Prefer `ssh ha-local` when on local network, fallback to `ssh ha` when remote
-- Use `| tee` with `> /dev/null` to copy file content cleanly
-- Never redirect stderr (`2>&1`) when capturing file contents - error messages will corrupt the file
-- Save to current directory (`/Users/gcamp/Dev/home-assistant`) instead of `/tmp`
-- Always verify the first line after copying: `head -1 automations.yaml`
-- If first line contains error text, the file is corrupted and must be re-fetched
-
-## Labels
-
-Labels are used to categorize and filter entities (including automations) in the Home Assistant UI.
-
-### How Labels Work
-
-- Labels are **NOT** stored in YAML files (automations.yaml, etc.)
-- Labels are stored in the entity registry at `/config/.storage/core.entity_registry`
-- The entity registry is a single-line JSON file
-- Labels can only be managed through:
-  1. The Home Assistant UI (Settings → Automations → Edit automation → Labels section)
-  2. Direct editing of `/config/.storage/core.entity_registry` (**HA must be stopped**)
-
-### Label Registry
-
-Available labels are defined in `/config/.storage/core.label_registry`:
-```json
-{
-  "labels": [
-    {"label_id": "tesla", "name": "Tesla", "color": "red", "icon": "mdi:car"},
-    {"label_id": "hvac", "name": "HVAC", "color": "green", "icon": "mdi:fan"},
-    {"label_id": "notif", "name": "Notif", "color": "blue", "icon": "mdi:bell"},
-    {"label_id": "helper", "name": "Helper", "color": "black", "icon": "mdi:progress-helper"},
-    {"label_id": "light", "name": "light", "color": "white", "icon": "mdi:ceiling-light"}
-  ]
-}
-```
-
-### Adding Labels to Automations
-
-**Via UI (Recommended):**
-1. Go to Settings → Automations & Scenes
-2. Click on the automation
-3. Click the edit icon
-4. Scroll to the Labels section at the bottom
-5. Select or create labels
-
-**Via Entity Registry (Advanced - CRITICAL STEPS):**
-
-**IMPORTANT**: Home Assistant overwrites the entity registry on startup, so you MUST stop HA first!
-
-```bash
-# 1. STOP Home Assistant first
-ssh ha "ha core stop"
-
-# 2. Update the entity registry with jq
-ssh ha 'jq ".data.entities |= map(if .platform == \"automation\" and (.unique_id | IN(\"1732300000001\", \"1732300000002\")) then .labels = [\"light\"] else . end)" /config/.storage/core.entity_registry > /tmp/updated_registry.json && cat /tmp/updated_registry.json > /config/.storage/core.entity_registry'
-
-# 3. Verify labels were applied
-ssh ha "cat /config/.storage/core.entity_registry" | jq -c '.data.entities[] | select(.unique_id == "1732300000001") | {entity_id, labels}'
-
-# 4. Start Home Assistant
-ssh ha "ha core start"
-
-# 5. Wait ~30 seconds, then verify labels persisted
-sleep 30 && ssh ha "cat /config/.storage/core.entity_registry" | jq -c '.data.entities[] | select(.unique_id == "1732300000001") | {entity_id, labels}'
-```
-
-Example entity registry entry:
-```json
-{
-  "entity_id": "automation.porch_background_light_at_sunset",
-  "unique_id": "1732300000001",
-  "platform": "automation",
-  "labels": ["light"],
-  ...
-}
-```
-
-**Important Notes:**
-- **NEVER edit entity registry while HA is running** - changes will be overwritten
-- Always stop HA first: `ssh ha "ha core stop"`
-- The entity registry is gitignored (in `.storage/`)
-- Labels must exist in `core.label_registry` before being assigned
-- Use `jq` to safely edit the JSON (preserves format)
-- After HA starts, hard refresh browser (Ctrl+Shift+R) to see labels in UI
+This is a production Home Assistant instance with:
+- Database: SQLite (`home-assistant_v2.db`) with WAL mode
+- Running on Home Assistant OS (Linux kernel 6.12.47-haos-raspi)
+- Platform: Raspberry Pi (based on kernel name)
+- Version tracking in `.HA_VERSION` file
