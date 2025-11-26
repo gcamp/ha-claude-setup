@@ -423,3 +423,4 @@ Example entity registry entry:
 - Labels must exist in `core.label_registry` before being assigned
 - Use `jq` to safely edit the JSON (preserves format)
 - After HA starts, hard refresh browser (Ctrl+Shift+R) to see labels in UI
+- use actual random ids for automation ids, not increment of existing ones
