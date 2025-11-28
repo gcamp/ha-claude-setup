@@ -424,3 +424,4 @@ Example entity registry entry:
 - Use `jq` to safely edit the JSON (preserves format)
 - After HA starts, hard refresh browser (Ctrl+Shift+R) to see labels in UI
 - use actual random ids for automation ids, not increment of existing ones
+- always validate the entities id you're adding in automations.
