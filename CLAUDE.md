@@ -37,61 +37,15 @@ See [Git Version Control](#git-version-control) section for full details.
 
 ## hass-cli Usage
 
-The `hass-cli` tool can be used to interact with the Home Assistant instance.
+The `hass-cli` tool can be used to interact with the Home Assistant instance. Use `hass-cli COMMAND --help` for detailed help on any command.
 
-### Available Commands
-- `area` - Get info and operate on areas
-- `config` - Get configuration from Home Assistant instance
-- `device` - Get info and operate on devices
-- `discover` - Discovery for the local network
-- `entity` - Get info on entities
-- `event` - Interact with events
-- `info` - Get basic info from Home Assistant
-- `map` - Show the location of the config or an entity on a map
-- `raw` - Call the raw API (advanced)
-- `service` - Call and work with services
-- `state` - Get info on entity state
-- `system` - System details and operations
-- `template` - Render templates on server or locally
+### Common Commands
 
-### Common Options
-- `-s, --server TEXT` - The server URL (or set `HASS_SERVER` env var)
-- `--token TEXT` - Bearer token for authentication (or set `HASS_TOKEN` env var)
-- `-o, --output [json|yaml|table|auto]` - Output format
-- `-v, --verbose` - Enables verbose mode
+**Service Commands:**
+- `hass-cli service call <domain.service>` - Call a service (e.g., `automation.reload`, `homeassistant.reload_core_config`)
 
-Use `hass-cli COMMAND --help` for detailed help on each command.
-
-### Key Command Details
-
-#### Config Commands
-- `hass-cli config full` - Get full configuration details
-- `hass-cli config components` - List loaded components
-- `hass-cli config release` - Get Home Assistant release version
-
-#### Service Commands
-- `hass-cli service list` - List all available services
-- `hass-cli service call <domain.service>` - Call a service (e.g., `homeassistant.reload_config_entry`)
-
-#### Entity Commands
-- `hass-cli entity list` - List all entities
-- `hass-cli entity rename <old_id> <new_id>` - Rename an entity
-- `hass-cli entity assign <entity_id> --area <area>` - Assign entity to area
-
-#### State Commands
-- `hass-cli state list` - List all entity states
+**State Commands:**
 - `hass-cli state get <entity_id>` - Get specific entity state
-- `hass-cli state edit <entity_id>` - Edit entity state
-- `hass-cli state toggle <entity_id>` - Toggle entity state
-- `hass-cli state turn_on/turn_off <entity_id>` - Turn entity on/off
-
-#### System Commands
-- `hass-cli system health` - Get system health status
-- `hass-cli system log` - Get system errors/logs
-
-#### Template Commands
-- `hass-cli template <template_file> [data_file]` - Render Jinja2 templates
-- `hass-cli template --local <template_file>` - Render template locally
 
 ## SSH Access
 
