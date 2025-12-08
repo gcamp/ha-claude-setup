@@ -132,27 +132,7 @@ lovelace:
 ```
 
 **Key Resources:**
-- lovelace-valetudo-map-card
-- lovelace-mushroom (heavily used)
-- mini-graph-card (heavily used)
-- lovelace-card-mod (for styling/animations)
-- decluttering-card (for Hilo defi templates)
-- stack-in-card
-- bar-card
-- config-template-card
-- And 5 more...
-
-**Important**: Resources MUST be defined in `configuration.yaml` when using YAML mode. Previously attempted YAML mode failed because resources were not explicitly defined.
-
-### Converting from UI Mode to YAML Mode
-
-If you need to convert again or help someone else:
-
-1. **Export from UI**: Get YAML from Raw Configuration Editor
-2. **Create ui-lovelace.yaml**: Save exported YAML to `/config/ui-lovelace.yaml`
-3. **Define resources**: Add `lovelace:` block to `configuration.yaml` with all resources from `.storage/lovelace_resources`
-4. **Reload config**: `hass-cli service call homeassistant.reload_core_config`
-5. **Test thoroughly**: Verify all views, custom cards, and decluttering templates work
+**Important**: Resources MUST be defined in `configuration.yaml` when using YAML mode, and important to validate they are there before adding any more requirements. 
 
 ### Dashboard Layout
 
@@ -261,18 +241,6 @@ ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of
 - Generates real-time summary of all automations (outputs to stdout)
 - Usage: `ssh ha-local "/config/automation-summary.sh"`
 
-**Automation Helper** (`/config/automation-helper.sh`)
-- Extract: `ssh ha-local "/config/automation-helper.sh extract '<id_or_alias>'"`
-- List: `ssh ha-local "/config/automation-helper.sh list"`
-- Merge: `ssh ha-local "/config/automation-helper.sh merge '<id_or_alias>'"`
-
-**Use extract/merge when:** Completely rewriting complex automation (100+ lines) or testing YAML syntax in isolation
-**Use direct edit when:** Small, surgical changes (90% of cases)
-
-**Notes:**
-- ✅ GUI editing still works! Single-file approach preserves UI editing
-- Extracted automations go to `/tmp/automation-extract/` (temporary)
-
 ### File Transfer Best Practices
 
 When copying files from HA to local for editing:
@@ -289,82 +257,3 @@ ssh ha-local 'cat /config/automations.yaml' | tee workspace/automations.yaml > /
 - Save to `workspace/` subdirectory (gitignored) instead of `/tmp`
 - Always verify the first line after copying: `head -1 workspace/automations.yaml`
 - If first line contains error text, the file is corrupted and must be re-fetched
-
-## Labels
-
-Labels are used to categorize and filter entities (including automations) in the Home Assistant UI.
-
-### How Labels Work
-
-- Labels are **NOT** stored in YAML files (automations.yaml, etc.)
-- Labels are stored in the entity registry at `/config/.storage/core.entity_registry`
-- The entity registry is a single-line JSON file
-- Labels can only be managed through:
-  1. The Home Assistant UI (Settings → Automations → Edit automation → Labels section)
-  2. Direct editing of `/config/.storage/core.entity_registry` (**HA must be stopped**)
-
-### Label Registry
-
-Available labels are defined in `/config/.storage/core.label_registry`:
-```json
-{
-  "labels": [
-    {"label_id": "tesla", "name": "Tesla", "color": "red", "icon": "mdi:car"},
-    {"label_id": "hvac", "name": "HVAC", "color": "green", "icon": "mdi:fan"},
-    {"label_id": "notif", "name": "Notif", "color": "blue", "icon": "mdi:bell"},
-    {"label_id": "helper", "name": "Helper", "color": "black", "icon": "mdi:progress-helper"},
-    {"label_id": "light", "name": "light", "color": "white", "icon": "mdi:ceiling-light"}
-  ]
-}
-```
-
-### Adding Labels to Automations
-
-**Via UI (Recommended):**
-1. Go to Settings → Automations & Scenes
-2. Click on the automation
-3. Click the edit icon
-4. Scroll to the Labels section at the bottom
-5. Select or create labels
-
-**Via Entity Registry (Advanced - CRITICAL STEPS):**
-
-**IMPORTANT**: Home Assistant overwrites the entity registry on startup, so you MUST stop HA first!
-
-```bash
-# 1. STOP Home Assistant first
-ssh ha-local "ha core stop"
-
-# 2. Update the entity registry with jq
-ssh ha-local 'jq ".data.entities |= map(if .platform == \"automation\" and (.unique_id | IN(\"1732300000001\", \"1732300000002\")) then .labels = [\"light\"] else . end)" /config/.storage/core.entity_registry > /tmp/updated_registry.json && cat /tmp/updated_registry.json > /config/.storage/core.entity_registry'
-
-# 3. Verify labels were applied
-ssh ha-local "cat /config/.storage/core.entity_registry" | jq -c '.data.entities[] | select(.unique_id == "1732300000001") | {entity_id, labels}'
-
-# 4. Start Home Assistant
-ssh ha-local "ha core start"
-
-# 5. Wait ~30 seconds, then verify labels persisted
-sleep 30 && ssh ha-local "cat /config/.storage/core.entity_registry" | jq -c '.data.entities[] | select(.unique_id == "1732300000001") | {entity_id, labels}'
-```
-
-Example entity registry entry:
-```json
-{
-  "entity_id": "automation.porch_background_light_at_sunset",
-  "unique_id": "1732300000001",
-  "platform": "automation",
-  "labels": ["light"],
-  ...
-}
-```
-
-**Important Notes:**
-- **NEVER edit entity registry while HA is running** - changes will be overwritten
-- Always stop HA first: `ssh ha-local "ha core stop"`
-- The entity registry is gitignored (in `.storage/`)
-- Labels must exist in `core.label_registry` before being assigned
-- Use `jq` to safely edit the JSON (preserves format)
-- After HA starts, hard refresh browser (Ctrl+Shift+R) to see labels in UI
-- use actual random ids for automation ids, not increment of existing ones
-- always validate the entities id you're adding in automations.
