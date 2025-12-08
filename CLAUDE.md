@@ -25,7 +25,7 @@ See [Git Version Control](#git-version-control) section for full details.
 ## Working with the Configuration
 
 - Use `hass-cli` to connect to and interact with the Home Assistant instance
-- For direct file editing, use SSH with the saved config: `ssh ha-local` (primary) or `ssh ha` (fallback)
+- For direct file editing, use SSH with the saved config: `ssh ha-local`
 - Configuration files are located in `/config/` on the Home Assistant host
 - Key configuration files:
   - `/config/automations.yaml` - Automation definitions
@@ -49,13 +49,7 @@ The `hass-cli` tool can be used to interact with the Home Assistant instance. Us
 
 ## SSH Access
 
-**IMPORTANT: Always use `ssh ha-local` as the default for all commands.**
-
-SSH access is available via two saved configs:
-- `ssh ha-local` - **PRIMARY** - Use this by default (faster, more reliable on local network)
-- `ssh ha` - Fallback only when ha-local is unavailable
-
-The SSH connection provides direct access to the Home Assistant host for file editing and system management.
+SSH access is available via `ssh ha-local` which provides direct access to the Home Assistant host for file editing and system management.
 
 **Note**: Save temporary files to the `workspace/` subdirectory instead of `/tmp` for better organization. The `workspace/` directory is gitignored.
 
@@ -277,7 +271,6 @@ ssh ha-local "cd /config && git add -A && git commit -m 'Claude: <description of
 
 **Notes:**
 - ✅ GUI editing still works! Single-file approach preserves UI editing
-- **Always use `ssh ha-local` by default** (prefer over `ssh ha` to avoid connection errors)
 - Extracted automations go to `/tmp/automation-extract/` (temporary)
 
 ### File Transfer Best Practices
@@ -286,15 +279,11 @@ When copying files from HA to local for editing:
 
 **ALWAYS use this pattern to avoid corrupting files:**
 ```bash
-# Good: Direct file copy to workspace subdirectory
+# Direct file copy to workspace subdirectory
 ssh ha-local 'cat /config/automations.yaml' | tee workspace/automations.yaml > /dev/null
-
-# Bad: Redirecting stderr can mix error messages into file
-ssh ha 'cat /config/automations.yaml' > workspace/automations.yaml 2>&1
 ```
 
 **Key points:**
-- **Always use `ssh ha-local` by default**, fallback to `ssh ha` only if unavailable
 - Use `| tee` with `> /dev/null` to copy file content cleanly
 - Never redirect stderr (`2>&1`) when capturing file contents - error messages will corrupt the file
 - Save to `workspace/` subdirectory (gitignored) instead of `/tmp`
