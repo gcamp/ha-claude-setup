@@ -35,6 +35,10 @@ See [Git Version Control](#git-version-control) section for full details.
   - `/config/sensors.yaml` - Sensor configurations
 - Changes to configuration files typically require restarting Home Assistant or reloading the specific integration
 
+## Documentation
+
+Use context7 MCP to get access to the latest HomeAssistant documentation. 
+
 ## hass-cli Usage
 
 The `hass-cli` tool can be used to interact with the Home Assistant instance. Use `hass-cli COMMAND --help` for detailed help on any command.
