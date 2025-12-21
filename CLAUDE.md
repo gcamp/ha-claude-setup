@@ -41,7 +41,9 @@ Use context7 MCP to get access to the latest HomeAssistant documentation.
 
 ## InfluxDB Access
 
-Home Assistant logs sensor data to InfluxDB for historical analysis. See [INFLUXDB.md](INFLUXDB.md) for connection details and usage examples. 
+Home Assistant logs sensor data to InfluxDB for historical analysis. See [INFLUXDB.md](INFLUXDB.md) for connection details and usage examples.
+
+**Note:** Entity IDs in InfluxDB are stored WITHOUT the domain prefix (e.g., `montreal_advisory` not `sensor.montreal_advisory`). 
 
 ## hass-cli Usage
 
