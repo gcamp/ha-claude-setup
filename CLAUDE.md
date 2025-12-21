@@ -37,7 +37,11 @@ See [Git Version Control](#git-version-control) section for full details.
 
 ## Documentation
 
-Use context7 MCP to get access to the latest HomeAssistant documentation. 
+Use context7 MCP to get access to the latest HomeAssistant documentation.
+
+## InfluxDB Access
+
+Home Assistant logs sensor data to InfluxDB for historical analysis. See [INFLUXDB.md](INFLUXDB.md) for connection details and usage examples. 
 
 ## hass-cli Usage
 
