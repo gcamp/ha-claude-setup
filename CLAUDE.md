@@ -144,7 +144,8 @@ The dashboard uses the **sections layout** (vs. masonry). Sections organize card
 
 ## Configuration Best Practices
 
-- **Always validate before restarting**: `ssh ha-local "ha core check"` then `ssh ha-local "ha core restart"` if valid
+- **Validate configuration**: Use `hass-cli service call homeassistant.check_config` to validate changes
+- **Prefer reloading over restarting**: Most changes don't require a full restart - use reload services instead
 - Dashboard changes (ui-lovelace.yaml) take effect immediately on browser refresh
 - For automations/scripts, reload: `hass-cli service call automation.reload` or `homeassistant.reload_all`
 - Always commit working states to git before making experimental changes
@@ -225,7 +226,7 @@ scp workspace/automations.yaml ha-local:/config/automations.yaml
 **Step 3: Reload and Verify**
 ```bash
 # Validate
-ssh ha-local "ha core check"
+hass-cli service call homeassistant.check_config
 
 # Reload automations
 hass-cli service call automation.reload
